@@ -27,17 +27,33 @@ class PdfThumbnail: NSObject {
 
     func generatePage(pdfPage: PDFPage, filePath: String, page: Int) -> Dictionary<String, Any>? {
         let pageRect = pdfPage.bounds(for: .mediaBox)
-        let image = pdfPage.thumbnail(of: CGSize(width: pageRect.width * 4, height: pageRect.height * 4), for: .mediaBox)
+        let MAX_SIZE : CGFloat = 3000.0;
+        var height : CGFloat = pageRect.height
+        var width : CGFloat = pageRect.width
+
+        if ( width > height ) {
+            if ( width > MAX_SIZE ) {
+                height *= MAX_SIZE / width;
+                width = MAX_SIZE;
+            }
+        } else {
+            if( height > MAX_SIZE) {
+                width *= MAX_SIZE / height;
+                height = MAX_SIZE;
+            }
+        }
+
+        let image = pdfPage.thumbnail(of: CGSize(width: width, height: height), for: .mediaBox)
         let outputFile = getCachesDirectory().appendingPathComponent(getOutputFilename(filePath: filePath, page: page))
-        guard let data = image.jpegData(compressionQuality: 100) else {
+        guard let data = image.jpegData(compressionQuality: 80) else {
             return nil
         }
         do {
             try data.write(to: outputFile)
             return [
                 "uri": outputFile.absoluteString,
-                "width": Int(pageRect.width),
-                "height": Int(pageRect.height),
+                "width": Int(width),
+                "height": Int(height),
             ]
         } catch {
             return nil

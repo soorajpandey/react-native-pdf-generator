@@ -31,31 +31,23 @@ class PdfThumbnail: NSObject {
         var height : CGFloat = pageRect.height
         var width : CGFloat = pageRect.width
 
-        if ( width > height ) {
-            if ( width > MAX_SIZE ) {
-                height *= MAX_SIZE / width;
-                width = MAX_SIZE;
-            }
+        if (height > width) {
+            width = width * MAX_SIZE / height
+            height = MAX_SIZE
         } else {
-            if( height > MAX_SIZE) {
-                width *= MAX_SIZE / height;
-                height = MAX_SIZE;
-            }
+            height = height * MAX_SIZE / width
+            width = MAX_SIZE
         }
-
-        let image = pdfPage.thumbnail(of: CGSize(width: width, height: height), for: .mediaBox)
-        let outputFile = getCachesDirectory().appendingPathComponent(getOutputFilename(filePath: filePath, page: page))
-        guard let data = image.jpegData(compressionQuality: 80) else {
-            return nil
-        }
+        let size = CGSize(width: width, height: height)
+        let image = pdfPage.thumbnail(of: size, for: .cropBox)
+        let outputFilename = getOutputFilename(filePath: filePath, page: page)
+        let outputPath = getCachesDirectory().appendingPathComponent(outputFilename)
+        let data = image.jpegData(compressionQuality: 1.0)
         do {
-            try data.write(to: outputFile)
-            return [
-                "uri": outputFile.absoluteString,
-                "width": Int(width),
-                "height": Int(height),
-            ]
+            try data?.write(to: outputPath)
+            return ["page": page, "path": outputPath.absoluteString, "width": width, "height": height]
         } catch {
+            print("Error writing thumbnail to file: \(error)")
             return nil
         }
     }

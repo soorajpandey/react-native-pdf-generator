@@ -86,20 +86,12 @@ class PdfThumbnail: NSObject {
             reject("FILE_NOT_FOUND", "File \(filePath) not found", nil)
             return
         }
-
         var result: [Dictionary<String, Any>] = []
-        for page in 0..<pdfDocument.pageCount {
-            guard let pdfPage = pdfDocument.page(at: page) else {
-                reject("INVALID_PAGE", "Page number \(page) is invalid, file has \(pdfDocument.pageCount) pages", nil)
-                return
-            }
-            if let pageResult = generatePage(pdfPage: pdfPage, filePath: filePath, page: page) {
-                result.append(pageResult)
-            } else {
-                reject("INTERNAL_ERROR", "Cannot write image data", nil)
-                return
-            }
-        }
+        
+        let page = [
+            "count": pdfDocument.pageCount,
+        ] as [String : Any]
+        result.append(page)
         resolve(result)
     }
 }

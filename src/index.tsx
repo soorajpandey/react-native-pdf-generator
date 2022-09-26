@@ -9,6 +9,7 @@ export type ThumbnailResult = {
 type PdfThumbnailType = {
   generate(filePath: string, page: number): Promise<ThumbnailResult>;
   generateAllPages(filePath: string): Promise<ThumbnailResult[]>;
+  generatePageCount(filePath: string): Promise<number>;
 };
 
 const { PdfThumbnail } = NativeModules;
